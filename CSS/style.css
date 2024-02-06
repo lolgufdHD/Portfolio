@@ -23,8 +23,8 @@ body{
 .glass{
     box-shadow: 0px 0px 50px rgba(0,0,0,50%);
     border: rgba(255, 255, 255, 10%) solid;
-    border-radius: 30px;
     backdrop-filter: blur(30px);
+    border-radius: 25px;
 }
 
 
@@ -49,12 +49,21 @@ p{
     color: whitesmoke;
 }
 
-header{
-    margin-top: 50px;
-    width: 1200px;
-    border-radius: 40px;
-    height: 75px;
+header{ 
+    border-radius: 0px 0px 30px 30px;
+
+    box-shadow: 0px 0px 50px rgba(0,0,0,50%);
+    border: rgba(255, 255, 255, 10%) solid;
+    backdrop-filter: blur(30px);
+
+    width: 100%;
+    height: 100px;
     position: relative;
+}
+header h1{
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 
@@ -62,53 +71,64 @@ header{
 
 nav{
     position: relative;
-    top: 120px;
+    top: 130px;
+
     left: 50%;
-    height: 50px;
-    width: 700px;
+    height: 60px;
+    width: 100%;
     transform: translateX(-50%);
 
     border-radius: 50px;
 }
 nav ul{
     display: flex;
+    justify-content: space-between;
+
+    position: relative;
+
+    width: 100%;
+    height: 100%;
+}
+nav ul li{
+    width: 200px;
+    height: 100%;
     position: relative;
 
     top: 50%;
-    transform: translateY(50%);
-}
-nav ul li{
-    width: 230px;
-    position: relative;
+    transform: translateY(-50%);
 }
 nav ul li a{
+    position: absolute;
+
+    width: 100%;
+
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    text-align: center;
     color: white;
-    font-size: 20px;
-    width: 100px;
-    padding: 10px 20px;
-    border-radius: 30px;
-}
-nav ul li a:hover{
-    transition: 100ms;
-    box-shadow: 0px 0px 50px rgba(0,0,0,30%);
+    font-size: 25px;
 }
 
 
 
 .content-container{
+
     position: relative;
-    top: 250px;
     width: 1200px;
-    height: 1000px;
+    height: 3000px;
 }
 
 
 /*About Me (mit bild und text)*/
 .about-me{
-    padding: 30px;
+    padding: 20px;
     margin-top: 20px;
-    width: 90%;
+    width: 100%;
     height: 650px;
+
+    top: 300px;
 
     display: flex;
     justify-content: space-between;
@@ -119,33 +139,48 @@ nav ul li a:hover{
     position: relative;
 
     width: 45%;
-
-    padding: 20px;
-}
-.about-me_text-container{
-    position: relative;
-
-    width: 45%;
 }
 
 /*About me image*/
 .about-me_image-container img{
-    height: 94%;
+    height: 90%;
+
+    
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 
     border-radius: 30px;
+}
+
+
+.about-me_text-container{
+    position: relative;
+
+    width: 45%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 /*About me header*/
 .about-me_text-container .about-me_header{
     width: 100%;
-    height: 15%;
+    height: 10%;
+
+    position: relative;
 }
 .about-me_text-container .about-me_header h2{
     text-align: center;
-
     width: 100%;
 
-    padding: 10px;
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 /*About me main text*/
@@ -154,9 +189,9 @@ nav ul li a:hover{
     height: 80%;
 }
 .about-me_text-container .about-me_text p{
-    width: 100%;
-    height: 100%;
-    top: 100px;
+    width: 90%;
+    height: 90%;
+    margin: 5%;
 
-    padding: 10px;
+    font-size: 27px;
 }
