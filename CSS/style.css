@@ -5,6 +5,8 @@
     list-style: none;
     color: black;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    scroll-behavior: smooth;
 }
 
 body{
@@ -114,7 +116,6 @@ nav ul li a{
 
 
 .content-container{
-
     position: relative;
     width: 1200px;
     height: 3000px;
@@ -194,4 +195,21 @@ nav ul li a{
     margin: 5%;
 
     font-size: 27px;
+}
+
+.image-gallery{
+    position: absolute;
+
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    width: 100%;
+    height:fit-content;
+
+    top: 1200px;
+}
+.image-gallery_image img{
+    width: 250px;
+    margin: 20px;
 }
