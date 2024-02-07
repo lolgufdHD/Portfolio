@@ -112,6 +112,9 @@ nav ul li a{
     color: white;
     font-size: 25px;
 }
+nav ul li a:hover{
+    box-shadow: rgba(0, 0, 0, 0%);
+}
 
 
 
