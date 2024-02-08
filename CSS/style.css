@@ -3,7 +3,7 @@
     margin: 0px;
     text-decoration: none;
     list-style: none;
-    color: black;
+    color: white;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
     scroll-behavior: smooth;
@@ -98,6 +98,11 @@ nav ul li{
 
     top: 50%;
     transform: translateY(-50%);
+
+    box-shadow: 0px 0px 50px rgba(0,0,0,50%);
+    border: rgba(255, 255, 255, 10%) solid;
+
+    border-radius: 25px;
 }
 nav ul li a{
     position: absolute;
@@ -112,8 +117,8 @@ nav ul li a{
     color: white;
     font-size: 25px;
 }
-nav ul li a:hover{
-    box-shadow: rgba(0, 0, 0, 0%);
+nav ul li:hover{
+    box-shadow: 0px 0px 50px rgba(0,0,0,30%);
 }
 
 
@@ -199,20 +204,69 @@ nav ul li a:hover{
 
     font-size: 27px;
 }
+.about-me_text-container .about-me_text p a{
+    color:  #576E73;
+}
+
 
 .image-gallery{
     position: absolute;
 
     display: flex;
-    justify-content: space-between;
     flex-wrap: wrap;
+    gap: 10px;
 
     width: 100%;
     height:fit-content;
 
+    padding: 20px;
+
     top: 1200px;
 }
-.image-gallery_image img{
+.image-gallery img{
     width: 250px;
-    margin: 20px;
+
+    border-radius: 20px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+footer{
+    height: 300px;
+    
+    position: relative;
+}
+footer .footer_text{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    height: auto;
+    width: 400px;
+
+    padding: 20px;
+}
+footer .footer_text p{
+    text-align: center;
+}
+footer .footer_text p span{
+    font-size: 15px;
 }
