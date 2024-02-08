@@ -13,6 +13,7 @@ body{
     background-image: url(../Images/background1.png);
     background-repeat: no-repeat;
     background-size: cover;
+    background-attachment: fixed;
 }
 
 
@@ -79,8 +80,6 @@ nav{
     height: 60px;
     width: 100%;
     transform: translateX(-50%);
-
-    border-radius: 50px;
 }
 nav ul{
     display: flex;
@@ -88,7 +87,7 @@ nav ul{
 
     position: relative;
 
-    width: 100%;
+    width: 70%;
     height: 100%;
 }
 nav ul li{
@@ -98,26 +97,33 @@ nav ul li{
 
     top: 50%;
     transform: translateY(-50%);
-
-    box-shadow: 0px 0px 50px rgba(0,0,0,50%);
-    border: rgba(255, 255, 255, 10%) solid;
-
-    border-radius: 25px;
 }
-nav ul li a{
+nav ul li .nav_links{
+    transition: ease-in-out 200ms;
+
     position: absolute;
 
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
 
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
 
-    text-align: center;
+    width: 100%;
+    height: 100%;
+
     color: white;
     font-size: 25px;
 }
-nav ul li:hover{
+.nav_links:hover{
+    transition:ease-in-out 200ms;
+
+    width: 105%;
+    height: 105%;
+
     box-shadow: 0px 0px 50px rgba(0,0,0,30%);
 }
 
