@@ -1,6 +1,6 @@
                   function loadImages() {
             const gallery = document.getElementById('image-gallery');
-            const folderPath = './Images/imagegallery';
+            const folderPath = './Images/ImageGallery';
         
             const xhr = new XMLHttpRequest();
             xhr.open('GET', folderPath, true);
