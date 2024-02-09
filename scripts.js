@@ -1,30 +1,28 @@
-        // Function to fetch images from a folder and display them in the gallery
-        function loadImages() {
+                  function loadImages() {
             const gallery = document.getElementById('image-gallery');
-            
-            // Replace 'path/to/your/images/folder' with the path to your images folder
-            const folderPath = './Images/image-gallery';
+            const folderPath = './Images/imagegallery';
         
-            fetch(folderPath)
-              .then(response => response.text())
-              .then(data => {
-                // Parse the HTML content of the folder
-                const parser = new DOMParser();
-                const htmlDoc = parser.parseFromString(data, 'text/html');
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', folderPath, true);
         
-                // Get all image files in the folder
-                const images = Array.from(htmlDoc.querySelectorAll('a[href$=".jpg"], a[href$=".jpeg"], a[href$=".png"], a[href$=".gif"]'));
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    const parser = new DOMParser();
+                    const htmlDoc = parser.parseFromString(xhr.responseText, 'text/html');
+                    const images = Array.from(htmlDoc.querySelectorAll('a[href$=".jpg"], a[href$=".jpeg"], a[href$=".png"], a[href$=".gif"]'));
         
-                // Create and append image elements to the gallery
-                images.forEach(image => {
-                  const imageUrl = folderPath + '/' + image.getAttribute('href');
-                  const imgElement = document.createElement('img');
-                  imgElement.src = imageUrl;
-                  gallery.appendChild(imgElement);
-                });
-              })
-              .catch(error => console.error('Error fetching images:', error));
-          }
+                    images.forEach(image => {
+                        const imageUrl = folderPath + '/' + image.getAttribute('href');
+                        const imgElement = document.createElement('img');
+                        imgElement.src = imageUrl;
+                        gallery.appendChild(imgElement);
+                    });
+                } else {
+                    console.error('Failed to load images. Status:', xhr.status);
+                }
+            };
         
-          // Call the loadImages function when the page loads
-          window.onload = loadImages;
+            xhr.send();
+        }
+        
+        window.onload = loadImages;
