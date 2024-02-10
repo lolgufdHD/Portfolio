@@ -218,9 +218,9 @@ nav ul li .nav_links{
 .image-gallery{
     position: absolute;
 
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    column-gap: 10px;
 
     width: 100%;
     height:fit-content;
@@ -230,7 +230,7 @@ nav ul li .nav_links{
     top: 1200px;
 }
 .image-gallery img{
-    width: 250px;
+    width: 100%;
 
     border-radius: 20px;
 }
@@ -255,6 +255,7 @@ nav ul li .nav_links{
 
 
 footer{
+    display: none;
     height: 300px;
     
     position: relative;
