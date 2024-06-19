@@ -16,8 +16,6 @@ function loadImages() {
                 imgElement.src = image.getAttribute("href");
                 gallery.appendChild(imgElement);
             });
-        } else {
-            console.error('Failed to load images. Status:', xhr.status);
         }
     };
 
