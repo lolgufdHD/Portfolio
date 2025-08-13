@@ -94,23 +94,27 @@ p{
 
 /*About me image*/
 .about-me_image-container img{
-    height: 90%;
-
-    
+    height: 90%;  
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-
     border-radius: 30px;
 }
-
+/* Bloom Effekt für About Me Image*/
+.about-me_image-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('/Images/aboutme.png') no-repeat center/contain;
+  filter: blur(50px) brightness(0.7) saturate(2);
+  opacity: 0.4;
+  z-index: -1;
+}
 
 .about-me_text-container{
     position: relative;
-
     width: 50%;
-
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -127,9 +131,7 @@ p{
 .about-me_text-container .about-me_header h2{
     text-align: center;
     width: 100%;
-
     position: absolute;
-
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -144,7 +146,6 @@ p{
     width: 90%;
     height: 90%;
     margin: 5%;
-
     font-weight: 500;
 }
 .about-me_text-container .about-me_text p a{
@@ -159,8 +160,7 @@ p{
 
 footer{
     display: none;
-    height: 300px;
-    
+    height: 300px;    
     position: relative;
 }
 footer .footer_text{
@@ -168,10 +168,8 @@ footer .footer_text{
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-
     height: auto;
     width: 400px;
-
     padding: 20px;
 }
 footer .footer_text p{
