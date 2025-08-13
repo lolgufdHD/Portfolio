@@ -48,6 +48,9 @@ body {
     transform: translateX(-50%);
 }
 
+.link{
+    text-shadow: 10px 10px 30px rgb(255, 255, 255);
+}
 
 h1{
     font-size: 50px;
@@ -145,7 +148,13 @@ p{
     font-weight: 500;
 }
 .about-me_text-container .about-me_text p a{
-    color:  #ff0000;
+    background: radial-gradient(circle, #ff5100 40%, #ff0000 100%);
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-fill-color: transparent;
+    text-shadow: 1px 1px 30px rgb(255, 0, 0);
 }
 
 footer{
