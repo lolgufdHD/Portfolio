@@ -23,8 +23,8 @@ body {
     opacity: 0.20;
     pointer-events: none;
     animation: noise 10ms infinite;
-    width: calc(100vw + 20rem);
-    height: calc(100vh + 20rem);
+    width: calc(100vw + 100rem);
+    height: calc(100vh + 100rem);
     }
   }
 
@@ -177,4 +177,25 @@ footer .footer_text p{
 }
 footer .footer_text p span{
     font-weight: 200;
+}
+
+/* Use a media query to add a break point at 800px: */
+@media screen and (max-width: 800px) {
+  body {
+  background-color: #080808;
+  
+  .grain {
+    position: fixed;
+    z-index: -20;
+    background-image: url(https://upload.wikimedia.org/wikipedia/commons/5/5c/Image_gaussian_noise_example.png);
+    background-position: center center;
+    top: -10rem;
+    left: -10rem;
+    opacity: 0.20;
+    pointer-events: none;
+    animation: noise 10ms infinite;
+    width: calc(100vw + 100rem);
+    height: calc(100vh + 100rem);
+    }
+  }
 }
