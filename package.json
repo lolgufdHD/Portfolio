@@ -1,11 +1,11 @@
 {
   "name": "portfolio",
   "version": "1.0.0",
-  "description": "Leo Skoda's Portfolio - static website served with Node.js/Express",
+  "description": "Leo Skoda's Portfolio - static website served with a custom Node.js server",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "author": "Leo Skoda",
-  "license": "MIT",
+  "license": "MIT"
 }
