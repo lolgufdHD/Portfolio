@@ -5,7 +5,5 @@ services:
       dockerfile: Dockerfile
     container_name: portfolio_app
     ports:
-      - "3000:3000" # Change host:container port if needed
-    environment:
-      - NODE_ENV=production
+      - "4000:4000"
     restart: unless-stopped
