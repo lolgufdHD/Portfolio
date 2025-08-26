@@ -1,0 +1,11 @@
+services:
+  portfolio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: portfolio_app
+    ports:
+      - "3000:3000" # Change host:container port if needed
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
