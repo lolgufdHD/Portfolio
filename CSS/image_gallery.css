@@ -1,8 +1,0 @@
-.image_gallery{
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.image_gallery img{
-    width: 100%;
-}

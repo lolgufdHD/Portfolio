@@ -1,0 +1,7 @@
+.imageGallery{
+    display: flex;
+    flex-wrap: wrap;
+}
+.imageGallery img{
+    width: 100%;
+}
