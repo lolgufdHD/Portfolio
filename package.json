@@ -1,0 +1,14 @@
+{
+  "name": "portfolio",
+  "version": "1.0.0",
+  "description": "Leo Skoda's Portfolio - static website served with Node.js/Express",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Leo Skoda",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
