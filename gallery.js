@@ -1,4 +1,3 @@
-// gallery-structure.js (KOMPLETT - dynamisch für jedes Jahr)
 const fs = require("fs");
 const path = require("path");
 
@@ -67,7 +66,7 @@ function readGallery() {
       const images = fs.existsSync(catPath)
         ? fs.readdirSync(catPath).filter(f => /\.(jpg|jpeg|png|gif)$/i.test(f))
         : [];
-      if (images.length > 0) monthData[cat] = images;
+        monthData[cat] = images;
     });
 
       if (Object.keys(monthData).length > 0) yearData[month] = monthData;
@@ -78,5 +77,6 @@ function readGallery() {
 
   return result;
 }
+
 
 module.exports = { readGallery, getMonthFolder, initStructure, createYearFolders };
