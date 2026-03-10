@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Galerie</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <main>
+            <div class="timeline-content-container">
+            <% Object.keys(gallery)
+                .sort((a, b) => Number(b) - Number(a))  // 2026, 2025, 2024 ...
+                .forEach(year => { %>
+
+                <div class="timeline-year">
+                <h2><%= year %></h2>
+
+                <% for (const month in gallery[year]) { %>
+                    <div class="timeline-month">
+                    <h3><%= month %></h3>
+                    <div class="timeline-entry-container">
+
+                        <% for (const category in gallery[year][month]) { %>
+                        <div class="timeline-entry">
+                            <h4><%= category %></h4>
+                            <% gallery[year][month][category].forEach(img => { %>
+                            <img src="/bilder/<%= year %>/<%= getMonthFolder(month) %>/<%= category %>/<%= img %>" alt="">
+                            <% }) %>
+                        </div>
+                        <% } %>
+
+                    </div>
+                    </div>
+                <% } %>
+
+                </div>
+            <% }) %>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
