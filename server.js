@@ -125,7 +125,7 @@ const upload = multer({
 app.post(
   "/admin/upload",
   requireAuth,
-  upload.array("images", 50),
+   upload.array("images"),
   async (req, res) => {
     try {
       const { year, month, category } = req.body;
