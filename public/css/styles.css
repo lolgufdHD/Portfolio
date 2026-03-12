@@ -8,9 +8,22 @@
 
   --line-color: white;
   --text-color: white;
+  --accent-color: #d71921;
+}
+@font-face {
+  font-family: geist-sans;
+  src: url(../fonts/Geist-Regular.woff2);
+}
+@font-face {
+  font-family: geist-pixel;
+  src: url(../fonts/GeistPixel-Square.woff2);
+}
+@font-face {
+  font-family: geist-mono;
+  src: url(../fonts/GeistMono-Regular.woff2);
 }
 * {
-  font-family: geist mono;
+  font-family: geist-sans;
 
   margin: 0;
   padding: 0;
@@ -21,26 +34,28 @@
 
   scroll-behavior: smooth;
 }
-
+a{
+  color: var(--accent-color);
+}
 h1{
-  font-family: geist pixel square;
+  font-family: geist-pixel;
   font-size: 5rem;
   text-align: center;
 }
 h2{
-  font-family: geist pixel square;
+  font-family: geist-pixel;
   font-size: 3rem;
 }
 h3{
-  font-family: geist mono;
+  font-family: geist-mono;
   font-size: 2rem;
 }
 h4{
-  font-family: geist mono;
+  font-family: geist-mono;
   font-size: 1.5rem;
 }
 h5{
-  font-family: geist mono;
+  font-family: geist-mono;
   font-size: 1rem;
 }
 #scrollback{
