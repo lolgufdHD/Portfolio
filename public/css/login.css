@@ -1,0 +1,133 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg: #0a0a0a;
+    --surface: #151515;
+    --primary: #fff;
+    --secondary: #888;
+    --error: #ff4444;
+}
+
+@view-transition {
+    navigation: auto;
+}
+
+html, body {
+    display: grid;
+    height: 100%;
+    width: 100%;
+    place-items: center;
+    background: var(--bg);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+::selection {
+    background: var(--secondary);
+    color: var(--bg);
+}
+
+.wrapper {
+    width: 380px;
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 40px 30px;
+    text-align: center;
+    border: 1px solid #2a2a2a;
+}
+
+.wrapper h1 {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.wrapper form .field {
+    height: 60px;
+    width: 100%;
+    margin-top: 20px;
+    position: relative;
+}
+
+.wrapper form .field input {
+    height: 100%;
+    width: 100%;
+    outline: none;
+    font-size: 16px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border: 2px solid #333;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    background: transparent;
+    color: var(--primary);
+    caret-color: var(--primary);
+}
+
+.wrapper form .field input:focus,
+.wrapper form .field input:not(:placeholder-shown) {
+    border-color: var(--primary);
+}
+
+.wrapper form .field label {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    font-weight: 400;
+    font-size: 16px;
+    color: var(--secondary);
+    pointer-events: none;
+    transform: translateY(-50%);
+    transition: all 0.3s ease;
+    padding: 0 5px;
+}
+
+.wrapper form .field input:focus ~ label,
+.wrapper form .field input:not(:placeholder-shown) ~ label {
+    top: 0%;
+    font-size: 12px;
+    background: var(--surface);
+    color: var(--primary);
+    transform: translateY(-50%);
+}
+
+.wrapper form .field input::placeholder {
+    color: transparent;
+}
+
+.wrapper form .field input[type="submit"] {
+    border: none;
+    padding-left: 0;
+    margin-top: 10px;
+    color: var(--bg);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--primary);
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    width: 100%;
+    height: 50px;
+}
+
+.wrapper form .field input[type="submit"]:hover {
+    background: #e0e0e0;
+}
+
+.wrapper form .field input[type="submit"]:active {
+    transform: scale(0.98);
+}
+
+.error {
+    color: var(--error);
+    font-size: 14px;
+    margin-top: 10px;
+    font-weight: 500;
+}
