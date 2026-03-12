@@ -5,9 +5,12 @@ services:
     container_name: portfolio
     working_dir: /app
     volumes:
-      - ./:/app
+      - portfolio_data:/app
     ports:
       - "4000:3000"
     env_file:
       - .env
     command: sh -c "node server.js"
+    
+volumes:
+  portfolio_data:
