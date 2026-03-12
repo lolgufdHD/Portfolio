@@ -7,7 +7,7 @@ services:
     volumes:
       - ./:/app
     ports:
-      - "4000:4000"
+      - "4000:3000"
     env_file:
       - .env
     command: sh -c "node server.js"
