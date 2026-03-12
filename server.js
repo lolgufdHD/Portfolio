@@ -4,6 +4,7 @@ const cron = require("node-cron");
 const fs = require("fs");
 const multer = require("multer");
 const session = require("express-session");
+const crypto = require("crypto");
 require("dotenv").config();
 
 const {
@@ -15,14 +16,17 @@ const {
 const app = express();
 const BASE_DIR = path.join(__dirname, "timeline");
 
+const sessionSecret = process.env.SESSION_SECRET || crypto.randomBytes(64).toString("hex");
+
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "fallback-secret",
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false },
   }),
 );
+
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(express.json({ limit: "50mb" }));
 app.set("view engine", "ejs");
