@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const BASE_DIR = path.join(__dirname, "bilder");
+const BASE_DIR = path.join(__dirname, "timeline");
 const TEMPLATE_ROOT = path.join(BASE_DIR, "TEMPLATE");
 
 const monate = [
@@ -17,11 +17,7 @@ function getMonthFolder(monthName) {
 
 function initStructure() {
   if (!fs.existsSync(BASE_DIR)) fs.mkdirSync(BASE_DIR);
-
   if (!fs.existsSync(TEMPLATE_ROOT)) fs.mkdirSync(TEMPLATE_ROOT);
-
-  const currentYear = new Date().getFullYear().toString();
-  createYearFolders(currentYear);
 }
 
 function createYearFolders(year) {
@@ -61,13 +57,35 @@ function readGallery() {
 
       const monthData = {};
 
-    categories.forEach(cat => {
-      const catPath = path.join(monthPath, cat);
-      const images = fs.existsSync(catPath)
-        ? fs.readdirSync(catPath).filter(f => /\.(jpg|jpeg|png|gif)$/i.test(f))
-        : [];
-        monthData[cat] = images;
-    });
+      categories.forEach(cat => {
+        const catPath = path.join(monthPath, cat);
+        
+        const allFiles = fs.existsSync(catPath)
+          ? fs.readdirSync(catPath)
+          : [];
+        
+        const images = allFiles.filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f));
+        const videos = allFiles.filter(f => /\.(mp4|mov|avi|webm)$/i.test(f));
+
+        let video = null;
+        if (videos.length > 0) {
+          const filename = videos[0];
+          const cleanTitle = filename
+            .replace(/^\d+_/, '')
+            .replace(/\.[^/.]+$/, '')
+            .replace(/_/g, ' ');
+          
+          video = {
+            filename: filename,
+            title: cleanTitle || 'Video'
+          };
+        }
+        
+        monthData[cat] = {
+          images: images,
+          video: video
+        };
+      });
 
       if (Object.keys(monthData).length > 0) yearData[month] = monthData;
     });
@@ -77,6 +95,5 @@ function readGallery() {
 
   return result;
 }
-
 
 module.exports = { readGallery, getMonthFolder, initStructure, createYearFolders };
