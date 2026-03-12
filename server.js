@@ -8,13 +8,12 @@ require("dotenv").config();
 
 const {
   initStructure,
-  createYearFolders,
   readGallery,
   getMonthFolder,
 } = require("./gallery");
 
 const app = express();
-const BASE_DIR = path.join(__dirname, "bilder");
+const BASE_DIR = path.join(__dirname, "timeline");
 
 app.use(
   session({
@@ -28,16 +27,10 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(express.json({ limit: "50mb" }));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-app.use("/bilder", express.static(BASE_DIR));
+app.use("/timeline", express.static(BASE_DIR));
 app.use(express.static(path.join(__dirname, "public")));
 
 initStructure();
-
-cron.schedule("5 0 1 1 *", () => {
-  const year = new Date().getFullYear().toString();
-  console.log("Erstelle Jahresordner:", year);
-  createYearFolders(year);
-});
 
 function requireAuth(req, res, next) {
   if (req.session.authenticated) return next();
@@ -66,122 +59,121 @@ app.get("/admin/logout", (req, res) => {
 
 app.get("/admin", requireAuth, (req, res) => {
   const gallery = readGallery();
-
   const structuredData = {};
   const allYears = Object.keys(gallery).sort((a, b) => Number(b) - Number(a));
 
   allYears.forEach((year) => {
     structuredData[year] = {};
     const months = Object.keys(gallery[year]).sort((a, b) => {
-      const monate = [
-        "Januar",
-        "Februar",
-        "März",
-        "April",
-        "Mai",
-        "Juni",
-        "Juli",
-        "August",
-        "September",
-        "Oktober",
-        "November",
-        "Dezember",
-      ];
+      const monate = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
       return monate.indexOf(a) - monate.indexOf(b);
     });
 
     months.forEach((month) => {
       structuredData[year][month] = [];
       Object.keys(gallery[year][month]).forEach((category) => {
+        const catData = gallery[year][month][category];
         structuredData[year][month].push({
           year,
           month,
           category,
-          images: gallery[year][month][category],
+          assets: catData,
           path: `${year}/${getMonthFolder(month)}/${category}`,
-          cover: gallery[year][month][category][0] || null,
+          cover: catData.images[0] || (catData.video ? 'video' : null),
+          isEmpty: catData.images.length === 0 && !catData.video
         });
       });
     });
   });
 
-  res.render("admin-dashboard", {
-    structuredData,
-    allYears,
-    getMonthFolder,
-  });
+  res.render("admin-dashboard", { structuredData, allYears, getMonthFolder });
 });
 
+
 const storage = multer.memoryStorage();
+
 
 const upload = multer({
   storage: storage,
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith("image/")) cb(null, true);
-    else cb(new Error("Nur Bilder erlaubt!"), false);
-  },
+    const isImage = file.mimetype.startsWith("image/");
+    const isVideo = file.mimetype.startsWith("video/");
+    if (isImage || isVideo) cb(null, true);
+    else cb(new Error("Nur Bilder und Videos erlaubt!"), false);
+  }
 });
 
-app.post(
-  "/admin/upload",
-  requireAuth,
-   upload.array("images"),
-  async (req, res) => {
-    try {
-      const { year, month, category } = req.body;
+app.post("/admin/upload", requireAuth, upload.array("assets"), async (req, res) => {
+  try {
+    const { year, month, category } = req.body; 
 
-      console.log("Upload Request:", {
-        year,
-        month,
-        category,
-        files: req.files?.length,
-      });
+    const uploadPath = path.join(BASE_DIR, year.toString(), getMonthFolder(month), category);
+    if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
 
-      if (!year || !month || !category) {
-        return res.status(400).json({
-          success: false,
-          error: "Fehlende Ordner-Daten",
-          received: { year, month, category },
-        });
-      }
+    const existingFiles = fs.existsSync(uploadPath) ? fs.readdirSync(uploadPath) : [];
+    const hasVideo = existingFiles.some(f => /\.(mp4|mov|avi|webm)$/i.test(f));
+    
+    const savedImages = [];
+    let savedVideo = null;
 
-      const uploadPath = path.join(
-        BASE_DIR,
-        year.toString(),
-        getMonthFolder(month),
-        category,
-      );
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const isVideo = file.mimetype.startsWith("video/");
+        const cleanName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
+        const filename = Date.now() + "_" + cleanName;
 
-      if (!fs.existsSync(uploadPath)) {
-        fs.mkdirSync(uploadPath, { recursive: true });
-      }
-
-      const savedFiles = [];
-      if (req.files && req.files.length > 0) {
-        for (const file of req.files) {
-          const filename =
-            Date.now() +
-            "_" +
-            file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
-          await fs.promises.writeFile(
-            path.join(uploadPath, filename),
-            file.buffer,
-          );
-          savedFiles.push(filename);
+        if (isVideo) {
+          if (hasVideo || savedVideo) continue;
+          await fs.promises.writeFile(path.join(uploadPath, filename), file.buffer);
+          savedVideo = {
+            filename: filename,
+            title: file.originalname.replace(/\.[^/.]+$/, '') 
+          };
+        } else {
+          await fs.promises.writeFile(path.join(uploadPath, filename), file.buffer);
+          savedImages.push(filename);
         }
       }
-
-      res.json({
-        success: true,
-        count: savedFiles.length,
-        files: savedFiles,
-      });
-    } catch (err) {
-      console.error("Upload Error:", err);
-      res.status(500).json({ success: false, error: err.message });
     }
-  },
-);
+
+    res.json({
+      success: true,
+      images: savedImages,
+      video: savedVideo,
+      count: savedImages.length + (savedVideo ? 1 : 0)
+    });
+    
+  } catch (err) {
+    console.error("Upload Error:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post("/admin/update-video-title", requireAuth, async (req, res) => {
+  const { year, month, category, title } = req.body;
+  const catPath = path.join(BASE_DIR, year, getMonthFolder(month), category);
+  const metaPath = path.join(catPath, 'video-meta.json');
+  try {
+    await fs.promises.writeFile(metaPath, JSON.stringify({ title })); 
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post("/admin/delete-video", requireAuth, (req, res) => {
+  const { year, month, category, filename } = req.body;
+  const filePath = path.join(BASE_DIR, year, getMonthFolder(month), category, filename);
+  const metaPath = path.join(BASE_DIR, year, getMonthFolder(month), category, 'video-meta.json');
+  
+  try {
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    if (fs.existsSync(metaPath)) fs.unlinkSync(metaPath);
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
+});
 
 app.post("/admin/create-folder", requireAuth, (req, res) => {
   const { year, month, category } = req.body;
@@ -212,16 +204,29 @@ app.get("/admin/api/folder", requireAuth, (req, res) => {
   const folderPath = path.join(BASE_DIR, year, getMonthFolder(month), category);
 
   try {
-    const images = fs.existsSync(folderPath)
-      ? fs
-          .readdirSync(folderPath)
-          .filter((f) => /\.(jpg|jpeg|png|gif|webp)$/i.test(f))
-      : [];
+    const allFiles = fs.existsSync(folderPath) ? fs.readdirSync(folderPath) : [];
+    
+    const images = allFiles.filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f));
+    const videos = allFiles.filter(f => /\.(mp4|mov|avi|webm)$/i.test(f));
+    
+    let video = null;
+    if (videos.length > 0) {
+      const metaPath = path.join(folderPath, 'video-meta.json');
+      let title = 'Video';
+      if (fs.existsSync(metaPath)) {
+        try {
+          const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+          title = meta.title || 'Video';
+        } catch(e) {}
+      }
+      video = { filename: videos[0], title };
+    }
+
     res.json({
       success: true,
-      images,
+      assets: { images, video },
       path: `${year}/${getMonthFolder(month)}/${category}`,
-      info: { year, month, category },
+      info: { year, month, category }
     });
   } catch (err) {
     res.json({ success: false, error: err.message });
@@ -298,7 +303,7 @@ async function createNewFolder(e) {
     }
 
     if (files.length > 0) {
-      uploadText.textContent = `Lade ${files.length} Bilder hoch...`;
+      uploadText.textContent = `Lade ${files.length} Datein hoch...`;
 
       const uploadFormData = new FormData();
       Array.from(files).forEach((f) => uploadFormData.append("images", f));

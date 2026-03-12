@@ -8,69 +8,119 @@
 </head>
 <body>
     <div class="grain"></div>
+
     <header id="page-anchor">
         <div id="logo"></div>
         <div><h1>Leo Skoda</h1></div>
     </header>
+
     <main>
         <div class="aboutMe-container">
-            <div class="aboutMe-image">
-            </div>
+            <div class="aboutMe-image"></div>
             <div class="aboutMe-text">
                 <p>
                     Mein Name ist Leo,
-
                     ich bin 22 Jahre alt und habe ein Fachabitur als Mediengestalter für Bild und Ton. 
-                    Zurzeit mache ich hauptsächlich Fotos, aber in meiner Freizeit probiere ich mich auch an Videos <br>
-                    <br>
+                    Zurzeit mache ich hauptsächlich Fotos, aber in meiner Freizeit probiere ich mich auch an Videos <br><br>
                     Zudem arbeite ich auch mit CAD Software um Modelle für meinen 3D Drucker zu designen <br>
                 </p>
             </div>
         </div>
-        
+
         <div class="timeline-container">
             <h2>Photography</h2>
+
             <div class="timeline-content-container">
-                <div id="timeline-line">Test</div>
+                <div id="timeline-line"></div>
+
                 <div class="timeline-media-container">
+
                     <% Object.keys(gallery)
-                        .sort((a, b) => Number(b) - Number(a))  // 2026, 2025, 2024 ...
-                        .forEach(year => { %>
-        
-                        <div class="timeline-year">
+                        .sort((a, b) => Number(b) - Number(a))
+                        .forEach(year => {
+
+                        const yearData = gallery[year];
+
+                        const yearHasContent = Object.values(yearData).some(month =>
+                            Object.values(month).some(cat =>
+                                (cat.images && cat.images.length > 0) || cat.video
+                            )
+                        );
+
+                        if (!yearHasContent) return;
+                    %>
+
+                    <div class="timeline-year">
                         <h2><%= year %></h2>
-        
-                        <% for (const month in gallery[year]) { %>
-                            <div class="timeline-month">
+
+                        <% for (const month in gallery[year]) {
+
+                            const monthData = gallery[year][month];
+
+                            const monthHasContent = Object.values(monthData).some(cat =>
+                                (cat.images && cat.images.length > 0) || cat.video
+                            );
+
+                            if (!monthHasContent) continue;
+                        %>
+
+                        <div class="timeline-month">
                             <h3><%= month %></h3>
+
                             <div class="timeline-entry-container">
-        
-                                <% for (const category in gallery[year][month]) { %>
+
+                                <% for (const category in monthData) {
+
+                                    const catData = monthData[category];
+
+                                    const hasContent =
+                                        (catData.images && catData.images.length > 0) ||
+                                        catData.video;
+
+                                    if (!hasContent) continue;
+                                %>
+
                                 <div class="timeline-entry">
                                     <h5><%= category %></h5>
+
                                     <div class="timeline-entry-contents">
-                                        <% gallery[year][month][category].forEach(img => { %>
-                                        <img src="/bilder/<%= year %>/<%= getMonthFolder(month) %>/<%= category %>/<%= img %>" alt="">
+
+                                        <% catData.images.forEach(img => { %>
+                                            <img src="/timeline/<%= year %>/<%= getMonthFolder(month) %>/<%= category %>/<%= img %>" alt="">
                                         <% }) %>
+
+                                        <% if (catData.video) { %>
+                                            <div class="video-container">
+                                                <h5><%= catData.video.title %></h5>
+                                                <video 
+                                                    src="/timeline/<%= year %>/<%= getMonthFolder(month) %>/<%= category %>/<%= catData.video.filename %>" 
+                                                    controls 
+                                                    muted 
+                                                    loop 
+                                                    playsinline>
+                                                </video>
+                                            </div>
+                                        <% } %>
+
                                     </div>
                                 </div>
+
                                 <% } %>
-                                <div class="timeline-entry">
-                                    <h5>Warframe Clip</h5>
-                                    <div class="timeline-entry-contents">
-                                        <video src="../bilder/2026/12_Dezember/Warframe_1479165210148208640.mp4"></video>
-                                    </div>
-                                </div>                        
+
                             </div>
-                            </div>
-                        <% } %>
-        
                         </div>
+
+                        <% } %>
+                    </div>
+
                     <% }) %>
+
                 </div>
             </div>
         </div>
     </main>
+
     <a id="scrollback" href="#page-anchor">^</a>
+
 </body>
 </html>
