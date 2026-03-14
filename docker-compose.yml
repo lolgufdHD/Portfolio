@@ -1,16 +1,9 @@
-version: "3.9"
 services:
-  app:
-    image: node:20
+  portfolio:
+    build: .
     container_name: portfolio
-    working_dir: /app
-    volumes:
-      - portfolio_data:/app
     ports:
       - "4000:3000"
+    restart: unless-stopped
     env_file:
       - .env
-    command: sh -c "node server.js"
-    
-volumes:
-  portfolio_data:
