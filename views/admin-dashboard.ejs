@@ -15,10 +15,49 @@
             <button class="btn btn-primary" onclick="showNewFolderModal()">
                 <span>+</span> Neuer Ordner
             </button>
+            <button class="btn" onclick="openSettings()">
+                ⚙️ Einstellungen
+            </button>
             <a href="/" class="btn">Galerie</a>
             <a href="/admin/logout" class="btn btn-danger">Abmelden</a>
         </div>
     </header>
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settingsModal" onclick="if(event.target === this) closeSettings()">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2>⚙️ Einstellungen</h2>
+                <button class="btn" onclick="closeSettings()" style="padding: 0.5rem;">×</button>
+            </div>
+            <div class="settings-body">
+                <div class="setting-item">
+                    <label class="setting-label">About Me Bild</label>
+                    <p class="setting-description">
+                        Dieses Bild wird auf der Startseite angezeigt. 
+                        Unterstützte Formate: JPG, PNG, GIF, WebP
+                    </p>
+                    
+                    <div class="current-image-preview" id="currentImagePreview">
+                        <img src="<%= aboutMeImage %>" alt="Current About Me" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                        <div class="no-image" style="display: none;">🖼️</div>
+                    </div>
+
+                    <div class="image-upload-zone" id="aboutmeDropZone"
+                         onclick="document.getElementById('aboutmeFileInput').click()"
+                         ondragover="handleAboutMeDragOver(event)" 
+                         ondragleave="handleAboutMeDragLeave(event)"
+                         ondrop="handleAboutMeDrop(event)">
+                        <span style="font-size: 2rem;">📷</span>
+                        <div class="upload-hint">
+                            <strong>Klicken zum Auswählen</strong> oder hierhin ziehen<br>
+                        </div>
+                    </div>
+                    <input type="file" id="aboutmeFileInput" accept="image/*" style="display:none" 
+                           onchange="uploadAboutMeImage(this.files[0])">
+                </div>
+            </div>
+        </div>
+    </div>
 
     <main>
         <% if (Object.keys(structuredData).length===0) { %>
@@ -215,6 +254,128 @@
         let currentImages = [];
         let currentImageIndex = 0;
         let droppedFiles = []; 
+
+        // Settings Functions
+        function openSettings() {
+            document.getElementById('settingsModal').classList.add('active');
+            refreshAboutMePreview();
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+        
+        async function refreshAboutMePreview() {
+            const img = document.querySelector('#currentImagePreview img');
+
+            try {
+                const res = await fetch('/admin/api/aboutme');
+                const data = await res.json();
+
+                if (res.ok && data.url) {
+                    img.src = `${data.url}?t=${Date.now()}`; // Cache-Buster
+                    img.style.display = 'block';
+                    img.nextElementSibling.style.display = 'none';
+                } else {
+                    img.style.display = 'none';
+                    img.nextElementSibling.style.display = 'flex';
+                    console.warn(data.error);
+                }
+            } catch (err) {
+                console.error('Fehler beim Laden des AboutMe-Bilds:', err);
+                img.style.display = 'none';
+                img.nextElementSibling.style.display = 'flex';
+            }
+        }
+                function handleAboutMeDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('aboutmeDropZone').classList.add('drag-over');
+        }
+
+        function handleAboutMeDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('aboutmeDropZone').classList.remove('drag-over');
+        }
+
+        function handleAboutMeDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('aboutmeDropZone').classList.remove('drag-over');
+
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            if (files.length === 0) {
+                showToast('⚠️ Nur Bilder erlaubt', 'warning');
+                return;
+            }
+
+            uploadAboutMeImage(files[0]);
+        }
+
+        async function uploadAboutMeImage(file) {
+            if (!file) return;
+            
+            if (!file.type.startsWith('image/')) {
+                showToast('⚠️ Nur Bilddateien erlaubt', 'warning');
+                return;
+            }
+
+            const progress = document.getElementById('uploadProgress');
+            const progressFill = document.getElementById('progressFill');
+            const uploadText = document.getElementById('uploadText');
+
+            progress.classList.add('active');
+            uploadText.textContent = 'Lade About Me Bild hoch...';
+            progressFill.style.width = '0%';
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const xhr = new XMLHttpRequest();
+
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        progressFill.style.width = (e.loaded / e.total * 100) + '%';
+                    }
+                };
+
+                const response = await new Promise((resolve, reject) => {
+                    xhr.onload = () => {
+                        try {
+                            const res = JSON.parse(xhr.responseText);
+                            if (res.success) {
+                                resolve(res);
+                            } else {
+                                reject(new Error(res.error));
+                            }
+                        } catch (err) {
+                            reject(err);
+                        }
+                    };
+                    xhr.onerror = () => reject(new Error('Upload fehlgeschlagen'));
+                    xhr.open('POST', '/admin/upload-aboutme');
+                    xhr.send(formData);
+                });
+
+                uploadText.textContent = '✅ Bild aktualisiert!';
+                progressFill.style.width = '100%';
+                
+                setTimeout(() => {
+                    progress.classList.remove('active');
+                    refreshAboutMePreview();
+                    showToast('✅ About Me Bild erfolgreich aktualisiert', 'success');
+                }, 1000);
+
+            } catch (err) {
+                console.error('Upload error:', err);
+                uploadText.textContent = '❌ Fehler: ' + err.message;
+                setTimeout(() => progress.classList.remove('active'), 3000);
+                showToast('❌ Upload fehlgeschlagen', 'error');
+            }
+        }
+
         async function uploadToCurrentFolder(files) {
             if (!currentFolder) {
                 showToast('Kein Ordner ausgewählt', 'error');
@@ -723,6 +884,9 @@
             }
             if (e.key === 'Escape' && document.getElementById('newFolderModal').classList.contains('active')) {
                 hideNewFolderModal();
+            }
+            if (e.key === 'Escape' && document.getElementById('settingsModal').classList.contains('active')) {
+                closeSettings();
             }
         });
 

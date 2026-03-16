@@ -41,7 +41,18 @@ function readGallery() {
   years.forEach(year => {
     const yearPath = path.join(BASE_DIR, year);
     const monthsRaw = fs.readdirSync(yearPath);
-    const monthsSorted = monate.filter(m => monthsRaw.includes(getMonthFolder(m)));
+    
+    const monthsSorted = monthsRaw
+      .filter(folderName => {
+        const monthName = folderName.split('_')[1];
+        return monate.includes(monthName);
+      })
+      .sort((a, b) => {
+        const monthA = a.split('_')[1];
+        const monthB = b.split('_')[1];
+        return monate.indexOf(monthA) - monate.indexOf(monthB);
+      })
+      .map(folderName => folderName.split('_')[1]); 
 
     const yearData = {};
 

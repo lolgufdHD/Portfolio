@@ -43,7 +43,8 @@ function requireAuth(req, res, next) {
 
 app.get("/", (req, res) => {
   const data = readGallery();
-  res.render("index", { gallery: data, getMonthFolder });
+    const aboutMeImage = getAboutMeImage();
+  res.render("index", { gallery: data, getMonthFolder, aboutMeImage });
 });
 
 app.get("/admin/login", (req, res) =>
@@ -65,6 +66,7 @@ app.get("/admin", requireAuth, (req, res) => {
   const gallery = readGallery();
   const structuredData = {};
   const allYears = Object.keys(gallery).sort((a, b) => Number(b) - Number(a));
+      const aboutMeImage = getAboutMeImage();
 
   allYears.forEach((year) => {
     structuredData[year] = {};
@@ -90,7 +92,7 @@ app.get("/admin", requireAuth, (req, res) => {
     });
   });
 
-  res.render("admin-dashboard", { structuredData, allYears, getMonthFolder });
+  res.render("admin-dashboard", { structuredData, allYears, getMonthFolder, aboutMeImage });
 });
 
 
@@ -153,14 +155,48 @@ app.post("/admin/upload", requireAuth, upload.array("assets"), async (req, res) 
   }
 });
 
-app.post("/admin/update-video-title", requireAuth, async (req, res) => {
-  const { year, month, category, title } = req.body;
-  const catPath = path.join(BASE_DIR, year, getMonthFolder(month), category);
-  const metaPath = path.join(catPath, 'video-meta.json');
+const aboutUpload = multer({ storage: multer.memoryStorage() });
+
+app.post("/admin/upload-aboutme", requireAuth, upload.single("image"), async (req, res) => {
   try {
-    await fs.promises.writeFile(metaPath, JSON.stringify({ title })); 
-    res.json({ success: true });
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ success: false, error: "Keine Datei hochgeladen" });
+    }
+
+    const ext = path.extname(file.originalname).toLowerCase();
+    const allowed = [".png", ".jpg", ".jpeg", ".webp", ".gif"];
+
+    if (!allowed.includes(ext)) {
+      return res.status(400).json({ success: false, error: "Format nicht erlaubt" });
+    }
+
+    const mediaDir = path.join(__dirname, "public", "media");
+
+    if (!fs.existsSync(mediaDir)) {
+      fs.mkdirSync(mediaDir, { recursive: true });
+    }
+
+    const existingFiles = fs.readdirSync(mediaDir);
+    for (const f of existingFiles) {
+      if (f.startsWith("aboutme")) {
+        fs.unlinkSync(path.join(mediaDir, f));
+      }
+    }
+
+    const filename = `aboutme${path.extname(req.file.originalname)}`;
+    const savePath = path.join(mediaDir, filename);
+
+    await fs.promises.writeFile(savePath, file.buffer);
+
+    res.json({
+      success: true,
+      file: "/media/" + filename
+    });
+
   } catch (err) {
+    console.error("AboutMe Upload Error:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -340,6 +376,35 @@ async function createNewFolder(e) {
     uploadText.textContent = "❌ Fehler: " + err.message;
     setTimeout(() => progress.classList.remove("active"), 3000);
   }
+}
+
+app.get('/admin/api/aboutme', (req, res) => {
+    const mediaDir = path.join(__dirname, 'public', 'media');
+
+    if (!fs.existsSync(mediaDir)) {
+        return res.status(404).json({ error: 'Media-Ordner nicht gefunden' });
+    }
+
+    const files = fs.readdirSync(mediaDir);
+    const aboutFile = files.find(f => f.toLowerCase().startsWith('aboutme'));
+
+    if (!aboutFile) {
+        return res.status(404).json({ error: 'Kein AboutMe-Bild gefunden' });
+    }
+
+    res.json({ url: `/media/${aboutFile}` });
+});
+
+
+function getAboutMeImage() {
+  const mediaDir = path.join(__dirname, "public", "media");
+
+  if (!fs.existsSync(mediaDir)) return null;
+
+  const files = fs.readdirSync(mediaDir);
+  const about = files.find(f => f.startsWith("aboutme"));
+
+  return about ? "/media/" + about : null;
 }
 
 app.listen(3000, () => console.log("Server läuft auf http://localhost:3000"));
