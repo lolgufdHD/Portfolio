@@ -132,9 +132,11 @@ header{
 }
 
 .aboutMe-container{
+  --imageHeight: 600px;
+  --aboutMePadding: 1em;
   background-color: var(--surface0);
   border-radius: calc(15px + 1em);
-  padding: 1em;
+  padding: var(--aboutMePadding);
   height: 600px;
 
   display: flex;
@@ -143,8 +145,7 @@ header{
   font-size: 1.5rem;
 
   .aboutMe-image{
-    aspect-ratio: 1;
-    height: 100%;
+    height: calc(var(--imageHeight) - (var(--aboutMePadding) * 2));
 
     img{
       aspect-ratio: 1;
