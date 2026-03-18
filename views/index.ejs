@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="../css/styles.css">
+    
 </head>
 <body>
     <div class="grain"></div>
@@ -17,7 +19,7 @@
     <main>
         <div class="aboutMe-container">
             <div class="aboutMe-image">
-                <img src="<%= aboutMeImage %>" alt="Portrait von Leo Skoda">
+                <img src="<%= aboutMeImage %>" alt="Portrait von Leo Skoda" loading="lazy">
             </div>
             <div class="aboutMe-text">
                 <h2>Über mich</h2>
@@ -91,7 +93,7 @@
                                     <div class="timeline-entry-contents">
 
                                         <% catData.images.forEach(img => { %>
-                                            <img src="/timeline/<%= year %>/<%= getMonthFolder(month) %>/<%= category %>/<%= img %>" alt="">
+                                            <img src="/timeline/<%= year %>/<%= getMonthFolder(month) %>/<%= category %>/<%= img %>" alt="" loading="lazy">
                                         <% }) %>
 
                                         <% if (catData.video) { %>

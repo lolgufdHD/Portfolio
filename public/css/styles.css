@@ -148,9 +148,9 @@ header{
 
     img{
       aspect-ratio: 1;
+      height: 100%;
       object-fit: cover;
       border-radius: 15px;
-      height: 100%;
     }
   }
   .aboutMe-text{
@@ -267,10 +267,17 @@ header{
 }
 
 @media screen and (max-width: 1500px) {
-  *{
-    border: gray solid 1px;
-  }
   .aboutMe-container{
-    padding: 0;
+    padding: 1em;
     flex-direction: column;
+    height: auto;
+    width: 50vw;
+    min-width: 20em;
+    img{
+      width: 100%;
+    }
+    .aboutMe-text{
+      width: 100%;
+    }
+  }
 }
