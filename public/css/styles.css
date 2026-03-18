@@ -1,6 +1,9 @@
 :root {
   --timeline-TopBottomShadowSize: 100px;
 
+  --timeline-img-span: 7;
+  --timeline-video-span: 3;   
+
   --bg-color: black;
   --surface0: #1c1c1c;
   --surface1: #2a2a2a;
@@ -130,8 +133,7 @@ header{
 
 .aboutMe-container{
   background-color: var(--surface0);
-  border-radius: 15px;
-  
+  border-radius: calc(15px + 1em);
   padding: 1em;
   height: 600px;
 
@@ -142,13 +144,21 @@ header{
 
   .aboutMe-image{
     aspect-ratio: 1;
+    height: 100%;
 
     img{
-      width: 100px;
-      height: 100px;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 15px;
+      height: 100%;
     }
   }
   .aboutMe-text{
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    padding: 1em;
+
     width: 30em;
   }
 }
@@ -192,6 +202,7 @@ header{
       display: flex;
       flex-direction: column;
       gap: 5em;
+      padding-left: 1em;
       
       h2 {
         text-align: left;
@@ -227,11 +238,7 @@ header{
             flex-direction: column;
             gap: 1em;
   
-            .timeline-entry-contents{
-              --timeline-img-span: 8;
-              --timeline-video-span: 3;     
-  
-  
+            .timeline-entry-contents{  
               --timeline-entry-contents-gap: 0.5em;
   
               --timeline-img-width: calc((100% - (var(--timeline-entry-contents-gap) * (var(--timeline-img-span) - 1))) / var(--timeline-img-span));
@@ -257,4 +264,13 @@ header{
       }
     }
   }
+}
+
+@media screen and (max-width: 1500px) {
+  *{
+    border: gray solid 1px;
+  }
+  .aboutMe-container{
+    padding: 0;
+    flex-direction: column;
 }
