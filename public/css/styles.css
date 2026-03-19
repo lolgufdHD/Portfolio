@@ -1,7 +1,6 @@
 :root {
   --timeline-img-span: 7;
   --timeline-video-span: 3;
-  --timeline-width: 200em;
 
   --bg-color: black;
   --surface0: #1c1c1c;
@@ -60,22 +59,6 @@ h5{
   font-family: geist-mono;
   font-size: 1rem;
 }
-#scrollback{
-  position: fixed;
-  bottom: 50px;
-  right: 50px;
-  border-radius: 10px;
-  width: 60px;
-  aspect-ratio: 1;
-  background-color: var(--surface1);
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  font-family: geist mono;
-  font-size: 30px;
-}
 
 body {
   display: flex;
@@ -114,7 +97,7 @@ body {
 }
 
 main {
-  width: 130em;
+  max-width: 130em;
   height: 1000em;
 
   padding-top: 10em;
@@ -124,12 +107,10 @@ main {
   gap: 10em;
   align-items: center;
 }
-
 header{
   width: 100%;
   padding: 4em;
 }
-
 .aboutMe-container{
   --imageHeight: 600px;
   --aboutMePadding: 1em;
@@ -137,11 +118,8 @@ header{
   border-radius: calc(15px + 1em);
   padding: var(--aboutMePadding);
   height: 600px;
-
   display: flex;
   gap: 2em;
-
-  font-size: 1.5rem;
 
   .aboutMe-image{
     height: calc(var(--imageHeight) - (var(--aboutMePadding) * 2));
@@ -159,10 +137,9 @@ header{
     gap: 1em;
     padding: 1em;
 
-    width: 30em;
+    width: 30rem;
   }
 }
-
 .timeline-container{
   display: flex;
   flex-direction: column;
@@ -173,7 +150,7 @@ header{
   }
 }
 .timeline-content-container {
-  max-width: var(--timeline-width);
+  max-width: 90vw;
   display: flex;
   flex-direction: row;
   align-items: end;
@@ -266,13 +243,7 @@ header{
   }
 }
 
-@media screen and (max-width: 200em) {
-  .timeline-content-container{
-    width: 90vw;
-  }
-  
-}
-@media screen and (max-width: 1500px) {
+@media screen and (max-width: 1300px) {
   main{
     padding: 1em;
   }
@@ -280,7 +251,7 @@ header{
     padding: 1em;
     flex-direction: column;
     height: auto;
-    width: 50vw;
+    width: 70vw;
     min-width: 20em;
     img{
       width: 100%;
@@ -291,5 +262,24 @@ header{
   }
   .timeline-entry-container{
     --timeline-img-span: 3;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  h1{
+    font-size: 3rem;
+  }
+  h2{
+    font-size: 2rem;
+  }
+  .aboutMe-container{
+    width: 90vw;
+  }
+  .aboutMe-image{
+    display: none;
+  }
+  .aboutMe-text{
+    font-size: 0.75rem;
+    width: 100%;
   }
 }
