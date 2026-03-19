@@ -1,6 +1,7 @@
 :root {
   --timeline-img-span: 7;
-  --timeline-video-span: 3;   
+  --timeline-video-span: 3;
+  --timeline-width: 200em;
 
   --bg-color: black;
   --surface0: #1c1c1c;
@@ -172,7 +173,7 @@ header{
   }
 }
 .timeline-content-container {
-  width: 100%;
+  max-width: var(--timeline-width);
   display: flex;
   flex-direction: row;
   align-items: end;
@@ -265,7 +266,16 @@ header{
   }
 }
 
+@media screen and (max-width: 200em) {
+  .timeline-content-container{
+    width: 90vw;
+  }
+  
+}
 @media screen and (max-width: 1500px) {
+  main{
+    padding: 1em;
+  }
   .aboutMe-container{
     padding: 1em;
     flex-direction: column;
@@ -278,5 +288,8 @@ header{
     .aboutMe-text{
       width: 100%;
     }
+  }
+  .timeline-entry-container{
+    --timeline-img-span: 3;
   }
 }
