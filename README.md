@@ -10,4 +10,6 @@ services:
     ports:
       - "4000:3000"
     restart: unless-stopped
+    environment:
+      - ADMIN_PASSWORD=changeme
 ```
