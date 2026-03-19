@@ -1,0 +1,38 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # 2. Log in to Docker Hub
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      # 3. Set image name
+      - name: Set image name
+        run: echo "IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/portfolio" >> $GITHUB_ENV
+
+      # 4. Build Docker image with commit SHA tag
+      - name: Build Docker image
+        run: docker build -t $IMAGE_NAME:${{ github.sha }} .
+
+      # 5. Push SHA-tagged image
+      - name: Push SHA image
+        run: docker push $IMAGE_NAME:${{ github.sha }}
+
+      # 6. Tag as latest
+      - name: Tag as latest
+        run: docker tag $IMAGE_NAME:${{ github.sha }} $IMAGE_NAME:latest
+
+      # 7. Push latest
+      - name: Push latest image
+        run: docker push $IMAGE_NAME:latest
