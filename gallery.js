@@ -50,7 +50,7 @@ function readGallery() {
       .sort((a, b) => {
         const monthA = a.split('_')[1];
         const monthB = b.split('_')[1];
-        return monate.indexOf(monthA) - monate.indexOf(monthB);
+        return monate.indexOf(monthB) - monate.indexOf(monthA);
       })
       .map(folderName => folderName.split('_')[1]); 
 
