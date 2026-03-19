@@ -1,0 +1,38 @@
+name: Auto Assign
+
+on:
+  project_card:
+    types: [moved]
+
+jobs:
+  assign_reviewer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const card = context.payload.project_card;
+            const columnName = context.payload.project_column.name;
+
+            const projectId = card.project_id;
+            const project = await github.projects.get({
+              project_id: projectId
+            });
+
+            const projectName = project.data.name;
+
+            if (projectName === "TO-DOs" && columnName === "In review" && card.content_url) {
+              const issue_number = parseInt(card.content_url.split("/").pop());
+
+              const assignees = ["lolgufdhd"]; 
+
+              await github.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue_number,
+                assignees: assignees
+              });
+
+              console.log(`Assigned ${assignees} to issue #${issue_number} in project "${projectName}"`);
+            }
