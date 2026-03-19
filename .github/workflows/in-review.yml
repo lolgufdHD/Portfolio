@@ -1,6 +1,7 @@
-name: Auto Assign
+name: Auto Assign Reviewers
 
 on:
+  workflow_dispatch:
   project_card:
     types: [moved]
 
@@ -12,27 +13,59 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const card = context.payload.project_card;
-            const columnName = context.payload.project_column.name;
+            const reviewers = ["lolgufdhd"];
+            
+            let cards = [];
 
-            const projectId = card.project_id;
-            const project = await github.projects.get({
-              project_id: projectId
-            });
+            if (context.eventName === "workflow_dispatch") {
+              const { data: projects } = await github.projects.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              });
+              const project = projects.find(p => p.name === "TO-DOs");
+              if (!project) return;
 
-            const projectName = project.data.name;
+              const { data: columns } = await github.projects.listColumns({
+                project_id: project.id
+              });
+              const inReviewColumn = columns.find(c => c.name === "In review");
+              if (!inReviewColumn) return;
 
-            if (projectName === "TO-DOs" && columnName === "In review" && card.content_url) {
+              const { data } = await github.projects.listCards({
+                column_id: inReviewColumn.id
+              });
+              cards = data;
+            } 
+            
+            if (context.eventName === "project_card") {
+              const card = context.payload.project_card;
+              const columnName = context.payload.project_column.name;
+              const projectId = card.project_id;
+              const projectData = await github.projects.get({ project_id: projectId });
+              const projectName = projectData.data.name;
+
+              if (projectName === "TO-DOs" && columnName === "In review") {
+                cards = [card];
+              }
+            }
+
+            for (const card of cards) {
+              if (!card.content_url) continue;
               const issue_number = parseInt(card.content_url.split("/").pop());
 
-              const assignees = ["lolgufdhd"]; 
-
-              await github.issues.addAssignees({
+              const { data: issue } = await github.issues.get({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: issue_number,
-                assignees: assignees
+                issue_number
               });
 
-              console.log(`Assigned ${assignees} to issue #${issue_number} in project "${projectName}"`);
+              if (issue.assignees.length === 0) {
+                const assignee = reviewers[Math.floor(Math.random() * reviewers.length)];
+                await github.issues.addAssignees({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number,
+                  assignees: [assignee]
+                });
+              }
             }
