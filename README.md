@@ -12,4 +12,7 @@ services:
     restart: unless-stopped
     environment:
       - ADMIN_PASSWORD=changeme
+    volumes:
+      - /path/to/folder:/app/timeline
+      - /path/to/folder:/app/public/media
 ```
