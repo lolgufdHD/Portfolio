@@ -75,7 +75,9 @@ function readGallery() {
           ? fs.readdirSync(catPath)
           : [];
         
-        const images = allFiles.filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f));
+        const images = allFiles
+          .filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f))
+          .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
         const videos = allFiles.filter(f => /\.(mp4|mov|avi|webm)$/i.test(f));
 
         let video = null;
