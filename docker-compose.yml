@@ -1,0 +1,12 @@
+services:
+  portfolio:
+    build: .
+    container_name: portfolio
+    ports:
+      - "4000:3000"
+    restart: unless-stopped
+    environment:
+      ADMIN_PASSWORD: PASSWORD
+    volumes:
+      - ./timeline:/app/timeline
+      - ./public/media:/app/public/media

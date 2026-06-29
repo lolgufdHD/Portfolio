@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+    <header>
+        <h1>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="opacity:0.5"><path d="M2 4.5A1.5 1.5 0 013.5 3h3l1.5 2H13a1.5 1.5 0 011.5 1.5v6A1.5 1.5 0 0113 14H3a1.5 1.5 0 01-1.5-1.5v-8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            Dashboard
+        </h1>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="showNewFolderModal()">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
+                Neuer Ordner
+            </button>
+            <button class="btn" onclick="openSettings()">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M7 1v1.5M7 11.5V13M1 7h1.5M11.5 7H13M2.6 2.6l1.1 1.1M10.3 10.3l1.1 1.1M2.6 11.4l1.1-1.1M10.3 3.7l1.1-1.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Einstellungen
+            </button>
+            <a href="/" class="btn">Galerie</a>
+            <a href="/admin/logout" class="btn btn-danger">Abmelden</a>
+        </div>
+    </header>
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settingsModal" onclick="if(event.target === this) closeSettings()">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2>⚙️ Einstellungen</h2>
+                <button class="btn" onclick="closeSettings()" style="padding: 0.5rem;">×</button>
+            </div>
+            <div class="settings-body">
+                <div class="setting-item">
+                    <label class="setting-label">About Me Bild</label>
+                    <p class="setting-description">
+                        Dieses Bild wird auf der Startseite angezeigt. 
+                        Unterstützte Formate: JPG, PNG, GIF, WebP
+                    </p>
+                    
+                    <div class="current-image-preview" id="currentImagePreview">
+                        <img src="<%= aboutMeImage %>" alt="Current About Me" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                        <div class="no-image" style="display: none;">🖼️</div>
+                    </div>
+
+                    <div class="image-upload-zone" id="aboutmeDropZone"
+                         onclick="document.getElementById('aboutmeFileInput').click()"
+                         ondragover="handleAboutMeDragOver(event)" 
+                         ondragleave="handleAboutMeDragLeave(event)"
+                         ondrop="handleAboutMeDrop(event)">
+                        <span style="font-size: 2rem;">📷</span>
+                        <div class="upload-hint">
+                            <strong>Klicken zum Auswählen</strong> oder hierhin ziehen<br>
+                        </div>
+                    </div>
+                    <input type="file" id="aboutmeFileInput" accept="image/*" style="display:none" 
+                           onchange="uploadAboutMeImage(this.files[0])">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <% if (Object.keys(structuredData).length===0) { %>
+            <div class="empty-state">
+                <h2>Noch keine Ordner vorhanden</h2>
+                <p>Erstelle deinen ersten Ordner mit dem Button oben rechts</p>
+            </div>
+            <% } %>
+
+                <% Object.keys(structuredData).sort((a,b)=> b-a).forEach(year => { %>
+                    <section class="year-section">
+                        <h2 class="year-header">
+                            <%= year %>
+                        </h2>
+
+                        <% Object.keys(structuredData[year]).forEach(month=> { %>
+                            <div class="month-section">
+                                <h3 class="month-title">
+                                    <%= month %>
+                                </h3>
+
+                                <div class="folder-grid">
+                                    <% structuredData[year][month].forEach(folder=> { %>
+                                        <div class="folder-card <%= folder.assets.images.length === 0 ? 'empty-folder' : '' %>"
+                                            data-year="<%= folder.year %>" data-month="<%= folder.month %>"
+                                            data-category="<%= folder.category %>"
+                                            onclick="openFolder('<%= folder.year %>', '<%= folder.month %>', '<%= folder.category %>')"
+                                            ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+                                            ondrop="handleDrop(event, '<%= folder.year %>', '<%= folder.month %>', '<%= folder.category %>')">
+
+                                            <div class="drop-overlay">
+                                                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📥</div>
+                                                <div>Hier ablegen</div>
+                                            </div>
+
+                                            <div class="folder-cover">
+                                                <% if (folder.cover) { %>
+                                                    <img src="/timeline/<%= folder.path %>/<%= folder.cover %>" alt="">
+                                                    <% } else { %>
+                                                        <div class="empty-cover">
+                                                            <span>📂</span>
+                                                            <div>Leer</div>
+                                                        </div>
+                                                        <% } %>
+                                                        <div class="folder-cover-overlay">
+                                                            <span class="folder-image-count <%= folder.assets.images.length === 0 && !folder.assets.video ? 'empty-badge' : '' %>">
+                                                                <% if (folder.assets.images.length > 0) { %>
+                                                                    <%= folder.assets.images.length %> Bilder
+                                                                <% } %>
+                                                                <% if (folder.assets.video) { %>
+                                                                    <%= folder.assets.images.length > 0 ? ' • ' : '' %> Video
+                                                                <% } %>
+                                                                <% if (folder.assets.images.length === 0 && !folder.assets.video) { %>
+                                                                    Leer
+                                                                <% } %>
+                                                            </span>
+                                                        </div>
+                                            </div>
+
+                                            <div class="folder-info">
+                                                <span class="folder-name">
+                                                    <%= folder.category %>
+                                                </span>
+                                                <button class="folder-delete"
+                                                    onclick="event.stopPropagation(); deleteFolder('<%= folder.year %>', '<%= folder.month %>', '<%= folder.category %>')"
+                                                    title="Löschen">
+                                                    🗑️
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <% }) %>
+                                </div>
+                            </div>
+                            <% }) %>
+                    </section>
+                    <% }) %>
+    </main>
+
+    <!-- Folder Detail Modal -->
+    <div class="folder-modal" id="folderModal">
+        <div class="folder-modal-header">
+            <div class="folder-modal-title">
+                <h2 id="modalFolderName">Ordner</h2>
+                <p id="modalFolderPath">Pfad</p>
+            </div>
+            <div class="folder-modal-actions">
+                <button class="btn btn-primary" onclick="document.getElementById('modalFileInput').click()">
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
+                    Hinzufügen
+                </button>
+                <input type="file" id="modalFileInput" multiple accept="image/*,video/*" style="display:none"
+                    onchange="uploadToCurrentFolder(this.files)">
+                <button class="btn btn-ghost" onclick="closeFolderModal()" style="font-size:1.4rem;padding:0.3rem 0.6rem;">×</button>
+            </div>
+        </div>
+
+        <div class="modal-body-scroll">
+            <div class="drop-zone" id="modalDropZone" ondragover="handleModalDragOver(event)"
+                ondragleave="handleModalDragLeave(event)" ondrop="handleModalDrop(event)">
+                <div class="drop-zone-text">Bilder hierher ziehen oder klicken</div>
+            </div>
+
+            <div class="modal-image-grid" id="modalImageGrid"></div>
+
+            <div id="videoSection" style="display: none;" class="video-section">
+                <h3>Video</h3>
+                <div class="video-display">
+                    <video id="folderVideo" controls>
+                        <source src="" type="video/mp4">
+                    </video>
+                </div>
+                <div class="video-title" id="videoTitleDisplay"></div>
+                <div class="video-actions">
+                    <button class="btn btn-danger" onclick="deleteVideo()">Löschen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+        <button class="lightbox-close" onclick="closeLightbox()">×</button>
+        <button class="lightbox-nav lightbox-prev" onclick="navigateLightbox(-1)">‹</button>
+        <img id="lightboxImg" src="" alt="">
+        <button class="lightbox-nav lightbox-next" onclick="navigateLightbox(1)">›</button>
+    </div>
+
+    <!-- New Folder Modal -->
+    <div class="modal-overlay" id="newFolderModal" onclick="if(event.target === this) hideNewFolderModal()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Neuer Ordner</h2>
+                <button class="btn btn-ghost" onclick="hideNewFolderModal()" style="font-size:1.4rem;padding:0.3rem 0.6rem;">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="newFolderForm" onsubmit="createNewFolder(event)">
+                    <div class="form-group">
+                        <label>Jahr</label>
+                        <input class="form-control" type="number" name="year" value="<%= new Date().getFullYear() %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Monat</label>
+                        <select class="form-control" name="month" required>
+                            <% const
+                                monate=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+                                %>
+                                <% monate.forEach((m, i)=> { %>
+                                    <option value="<%= m %>" <%=i===new Date().getMonth() ? 'selected' : '' %>><%= m %>
+                                    </option>
+                                    <% }) %>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ordnername</label>
+                        <input class="form-control" type="text" name="category" placeholder="z.B. Urlaub, Events..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Bilder (optional)</label>
+                        <div class="drop-zone-new" id="dropZone"
+                            onclick="document.getElementById('newFolderFiles').click()"
+                            ondragover="handleNewFolderDragOver(event)" ondragleave="handleNewFolderDragLeave(event)"
+                            ondrop="handleNewFolderDrop(event)">
+                            <div class="drop-zone-label">Klicken zum Auswählen oder hierhin ziehen</div>
+                            <div id="fileList"></div>
+                        </div>
+                        <input type="file" id="newFolderFiles" multiple accept="image/*,video/*" style="display:none"
+                            onchange="updateFileList(this)">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="hideNewFolderModal()">Abbrechen</button>
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('newFolderForm').requestSubmit()">Erstellen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Progress -->
+    <div class="upload-progress" id="uploadProgress">
+        <div id="uploadText">Upload...</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentFolder = null;
+        let currentImages = [];
+        let currentImageIndex = 0;
+        let droppedFiles = []; 
+
+        // Settings Functions
+        function openSettings() {
+            document.getElementById('settingsModal').classList.add('active');
+            refreshAboutMePreview();
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+        
+        async function refreshAboutMePreview() {
+            const img = document.querySelector('#currentImagePreview img');
+
+            try {
+                const res = await fetch('/admin/api/aboutme');
+                const data = await res.json();
+
+                if (res.ok && data.url) {
+                    img.src = `${data.url}?t=${Date.now()}`; // Cache-Buster
+                    img.style.display = 'block';
+                    img.nextElementSibling.style.display = 'none';
+                } else {
+                    img.style.display = 'none';
+                    img.nextElementSibling.style.display = 'flex';
+                    console.warn(data.error);
+                }
+            } catch (err) {
+                console.error('Fehler beim Laden des AboutMe-Bilds:', err);
+                img.style.display = 'none';
+                img.nextElementSibling.style.display = 'flex';
+            }
+        }
+                function handleAboutMeDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('aboutmeDropZone').classList.add('drag-over');
+        }
+
+        function handleAboutMeDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('aboutmeDropZone').classList.remove('drag-over');
+        }
+
+        function handleAboutMeDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('aboutmeDropZone').classList.remove('drag-over');
+
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            if (files.length === 0) {
+                showToast('⚠️ Nur Bilder erlaubt', 'warning');
+                return;
+            }
+
+            uploadAboutMeImage(files[0]);
+        }
+
+        async function uploadAboutMeImage(file) {
+            if (!file) return;
+            
+            if (!file.type.startsWith('image/')) {
+                showToast('⚠️ Nur Bilddateien erlaubt', 'warning');
+                return;
+            }
+
+            const progress = document.getElementById('uploadProgress');
+            const progressFill = document.getElementById('progressFill');
+            const uploadText = document.getElementById('uploadText');
+
+            progress.classList.add('active');
+            uploadText.textContent = 'Lade About Me Bild hoch...';
+            progressFill.style.width = '0%';
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const xhr = new XMLHttpRequest();
+
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        progressFill.style.width = (e.loaded / e.total * 100) + '%';
+                    }
+                };
+
+                const response = await new Promise((resolve, reject) => {
+                    xhr.onload = () => {
+                        try {
+                            const res = JSON.parse(xhr.responseText);
+                            if (res.success) {
+                                resolve(res);
+                            } else {
+                                reject(new Error(res.error));
+                            }
+                        } catch (err) {
+                            reject(err);
+                        }
+                    };
+                    xhr.onerror = () => reject(new Error('Upload fehlgeschlagen'));
+                    xhr.open('POST', '/admin/upload-aboutme');
+                    xhr.send(formData);
+                });
+
+                uploadText.textContent = '✅ Bild aktualisiert!';
+                progressFill.style.width = '100%';
+                
+                setTimeout(() => {
+                    progress.classList.remove('active');
+                    refreshAboutMePreview();
+                    showToast('✅ About Me Bild erfolgreich aktualisiert', 'success');
+                }, 1000);
+
+            } catch (err) {
+                console.error('Upload error:', err);
+                uploadText.textContent = '❌ Fehler: ' + err.message;
+                setTimeout(() => progress.classList.remove('active'), 3000);
+                showToast('❌ Upload fehlgeschlagen', 'error');
+            }
+        }
+
+        async function uploadToCurrentFolder(files) {
+            if (!currentFolder) {
+                showToast('Kein Ordner ausgewählt', 'error');
+                return;
+            }
+
+            if (!files || files.length === 0) return;
+
+            const fileArray = Array.from(files);
+
+            await uploadFiles(fileArray, currentFolder.year, currentFolder.month, currentFolder.category);
+
+            setTimeout(() => {
+                openFolder(currentFolder.year, currentFolder.month, currentFolder.category);
+            }, 500);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            const card = e.currentTarget;
+            if (e.dataTransfer.types.includes('Files')) {
+                card.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        async function handleDrop(e, year, month, category) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.remove('drag-over');
+
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+            if (files.length === 0) {
+                return;
+            }
+
+            await uploadFiles(files, year, month, category);
+            setTimeout(() => location.reload(), 500);
+        }
+
+        let currentVideo = null;
+        async function openFolder(year, month, category) {
+            currentFolder = { year, month, category };
+            const res = await fetch(`/admin/api/folder?year=${ year }&month=${ month }&category=${ category }`);
+            const data = await res.json();
+            if (!data.success) return showToast('Fehler', 'error');
+
+            currentImages = data.assets.images;
+            currentVideo = data.assets.video;
+
+            document.getElementById('modalFolderName').textContent = category;
+            document.getElementById('modalFolderPath').textContent =
+                `${ month } ${ year } • ${ data.assets.images.length } Bilder${ currentVideo ? ' + Video' : '' }`;
+
+            renderModalImages(data.assets.images, data.path);
+
+            const videoSection = document.getElementById('videoSection');
+            if (currentVideo) {
+                videoSection.style.display = 'block';
+                document.getElementById('folderVideo').src = `/timeline/${ data.path }/${ currentVideo.filename }`;
+            } else {
+                videoSection.style.display = 'none';
+            }
+
+            document.getElementById('folderModal').classList.add('active');
+        }
+
+
+
+        async function deleteVideo() {
+            if (!confirm(`Video "${ currentVideo.title }" löschen?`)) return;
+
+            const res = await fetch('/admin/delete-video', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...currentFolder,
+                    filename: currentVideo.filename
+                })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                showToast('✅ Video gelöscht', 'success');
+                document.getElementById('videoSection').style.display = 'none';
+                currentVideo = null;
+                setTimeout(() => location.reload(), 500);
+            } else {
+                showToast('❌ Fehler: ' + data.error, 'error');
+            }
+        }
+
+        function openVideoLightbox() {
+            if (!currentVideo) return;
+
+            const lightbox = document.getElementById('lightbox');
+            const img = document.getElementById('lightboxImg');
+            const path = `${ currentFolder.year }/${ getMonthFolderName(currentFolder.month) }/${ currentFolder.category }`;
+
+            img.style.display = 'none';
+
+            let videoEl = document.getElementById('lightboxVideo');
+            if (!videoEl) {
+                videoEl = document.createElement('video');
+                videoEl.id = 'lightboxVideo';
+                videoEl.controls = true;
+                videoEl.style.cssText = 'max-width: 90vw; max-height: 90vh; border-radius: 8px;';
+                img.parentNode.insertBefore(videoEl, img.nextSibling);
+            }
+
+            videoEl.src = `/timeline/${ path }/${ currentVideo.filename }`;
+            videoEl.style.display = 'block';
+
+            document.querySelector('.lightbox-prev').style.display = 'none';
+            document.querySelector('.lightbox-next').style.display = 'none';
+
+            lightbox.classList.add('active');
+        }
+
+
+        function handleNewFolderDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('dropZone').classList.add('drag-over');
+        }
+
+        function handleNewFolderDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('dropZone').classList.remove('drag-over');
+        }
+
+        function handleNewFolderDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('dropZone').classList.remove('drag-over');
+
+            const files = Array.from(e.dataTransfer.files).filter(f =>
+                f.type.startsWith('image/') || f.type.startsWith('video/')
+            );
+            if (files.length === 0) {
+                showToast('⚠️ Nur Bilder erlaubt', 'warning');
+                return;
+            }
+
+            droppedFiles = files;
+
+            const list = document.getElementById('fileList');
+            const wrapper = document.getElementById('dropZone');
+            list.textContent = `${ files.length } Dateien ausgewählt (per Drag & Drop)`;
+            wrapper.classList.add('has-files');
+
+            showToast(`✅ ${ files.length } Bilder hinzugefügt`, 'success');
+        }
+
+
+        function renderModalImages(images, path) {
+            const grid = document.getElementById('modalImageGrid');
+
+            if (images.length === 0) {
+                grid.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><h3>Keine Bilder</h3><p>Ziehe Bilder hierher oder klicke "Bilder hinzufügen"</p></div>';
+                return;
+            }
+
+            grid.innerHTML = images.map((img, idx) => `
+                <div class="modal-image-item" onclick="openLightbox(${ idx })">
+                    <img src="/timeline/${ path }/${ img }" alt="" loading="lazy">
+                    <button class="image-delete-btn" onclick="event.stopPropagation(); deleteImage('${ img }')">×</button>
+                </div>
+            `).join('');
+        }
+
+        function closeFolderModal() {
+            document.getElementById('folderModal').classList.remove('active');
+            document.body.style.overflow = '';
+
+            document.querySelector('.folder-image-count').classList.remove('video-present');
+            currentFolder = null;
+        }
+
+        function handleModalDragOver(e) {
+            e.preventDefault();
+            document.getElementById('modalDropZone').classList.add('drag-over');
+        }
+
+        function handleModalDragLeave(e) {
+            document.getElementById('modalDropZone').classList.remove('drag-over');
+        }
+
+        async function handleModalDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('modalDropZone').classList.remove('drag-over');
+
+            const files = Array.from(e.dataTransfer.files).filter(f =>
+                f.type.startsWith('image/') || f.type.startsWith('video/')
+            );
+            if (files.length === 0) {
+                showToast('⚠️ Nur Bilder vom Desktop erlaubt', 'warning');
+                return;
+            }
+
+            await uploadFiles(files, currentFolder.year, currentFolder.month, currentFolder.category);
+            setTimeout(() => {
+                if (currentFolder) {
+                    openFolder(currentFolder.year, currentFolder.month, currentFolder.category);
+                }
+            }, 500);
+        }
+
+        async function uploadFiles(files, year, month, category) {
+            const progress = document.getElementById('uploadProgress');
+            const progressFill = document.getElementById('progressFill');
+            const uploadText = document.getElementById('uploadText');
+
+            progress.classList.add('active');
+            uploadText.textContent = `Lade ${ files.length } Dateien hoch...`;
+            progressFill.style.width = '0%';
+
+            const formData = new FormData();
+            files.forEach(f => formData.append('assets', f));
+            formData.append('year', year);
+            formData.append('month', month);
+            formData.append('category', category);
+
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        progressFill.style.width = (e.loaded / e.total * 100) + '%';
+                    }
+                };
+
+                xhr.onload = () => {
+                    try {
+                        const res = JSON.parse(xhr.responseText);
+                        if (res.success) {
+                            uploadText.textContent = `✅ ${ res.count} Dateien hochgeladen`;
+                            setTimeout(() => progress.classList.remove('active'), 1500);
+                            resolve(res);
+                        } else {
+                            throw new Error(res.error);
+                        }
+                    } catch (err) {
+                        uploadText.textContent = '❌ Fehler';
+                        setTimeout(() => progress.classList.remove('active'), 3000);
+                        reject(err);
+                    }
+                };
+
+                xhr.onerror = () => {
+                    uploadText.textContent = '❌ Netzwerkfehler';
+                    setTimeout(() => progress.classList.remove('active'), 3000);
+                    reject(new Error('Network error'));
+                };
+
+                xhr.open('POST', '/admin/upload');
+                xhr.send(formData);
+            });
+        }
+
+        function openLightbox(index) {
+            currentImageIndex = index;
+            updateLightbox();
+            document.getElementById('lightbox').classList.add('active');
+        }
+
+        function updateLightbox() {
+            const img = currentImages[currentImageIndex];
+            const path = `${ currentFolder.year }/${ getMonthFolderName(currentFolder.month) }/${ currentFolder.category }`;
+            document.getElementById('lightboxImg').src = `/timeline/${ path }/${ img }`;
+        }
+
+        function navigateLightbox(dir) {
+            currentImageIndex += dir;
+            if (currentImageIndex < 0) currentImageIndex = currentImages.length - 1;
+            if (currentImageIndex >= currentImages.length) currentImageIndex = 0;
+            updateLightbox();
+        }
+
+        function closeLightbox(e) {
+            if (e && e.target !== e.currentTarget && !e.target.classList.contains('lightbox-close')) return;
+
+            const lightbox = document.getElementById('lightbox');
+            const img = document.getElementById('lightboxImg');
+            const videoEl = document.getElementById('lightboxVideo');
+
+            lightbox.classList.remove('active');
+            img.style.display = 'block';
+
+            if (videoEl) {
+                videoEl.style.display = 'none';
+                videoEl.pause();
+            }
+
+            document.querySelector('.lightbox-prev').style.display = 'flex';
+            document.querySelector('.lightbox-next').style.display = 'flex';
+        }
+
+        async function deleteImage(filename) {
+            if (!confirm('Bild wirklich löschen?')) return;
+
+            const res = await fetch('/admin/delete-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...currentFolder, filename })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                openFolder(currentFolder.year, currentFolder.month, currentFolder.category);
+            }
+        }
+
+        async function deleteFolder(year, month, category) {
+            if (!confirm(`Ordner "${ category }" wirklich löschen?\nAlle Bilder werden unwiderruflich gelöscht!`)) return;
+
+            const res = await fetch('/admin/delete-folder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ year, month, category })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                showToast('Fehler beim Löschen', 'error');
+            }
+        }
+
+        function showNewFolderModal() {
+            document.getElementById('newFolderModal').classList.add('active');
+            document.getElementById('newFolderForm').reset();
+            document.getElementById('fileList').textContent = '';
+            document.getElementById('dropZone').classList.remove('has-files');
+            droppedFiles = [];
+        }
+
+        function hideNewFolderModal() {
+            document.getElementById('newFolderModal').classList.remove('active');
+            droppedFiles = [];
+        }
+
+        function updateFileList(input) {
+            const list = document.getElementById('fileList');
+            const wrapper = document.getElementById('dropZone');
+
+            if (input.files.length > 0) {
+                list.textContent = `${ input.files.length } Dateien ausgewählt`;
+                wrapper.classList.add('has-files');
+            } else {
+                list.textContent = '';
+                wrapper.classList.remove('has-files');
+            }
+        }
+
+        async function createNewFolder(e) {
+            e.preventDefault();
+
+            const form = document.getElementById('newFolderForm');
+            const formData = new FormData(form);
+            const year = formData.get('year');
+            const month = formData.get('month');
+            const category = formData.get('category');
+
+            const fileInput = document.getElementById('newFolderFiles');
+            const inputFiles = Array.from(fileInput.files);
+            const allFiles = [...inputFiles, ...droppedFiles];
+
+            if (!year || !month || !category) {
+                showToast('Bitte alle Felder ausfüllen', 'warning');
+                return;
+            }
+
+            const progress = document.getElementById('uploadProgress');
+            const progressFill = document.getElementById('progressFill');
+            const uploadText = document.getElementById('uploadText');
+
+            progress.classList.add('active');
+            progressFill.style.width = '0%';
+
+            try {
+                uploadText.textContent = 'Erstelle Ordner...';
+
+                const createRes = await fetch('/admin/create-folder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ year, month, category })
+                });
+
+                const createData = await createRes.json();
+
+                if (!createData.success) {
+                    throw new Error(createData.error || 'Ordner konnte nicht erstellt werden');
+                }
+
+                if (allFiles.length > 0) {
+                    const images = allFiles.filter(f => f.type.startsWith('image/'));
+                    const videos = allFiles.filter(f => f.type.startsWith('video/'));
+
+                    let statusText = [];
+                    if (images.length > 0) statusText.push(`${ images.length } Bilder`);
+                    if (videos.length > 0) statusText.push(`${ videos.length } Video(s)`);
+                    uploadText.textContent = `Lade ${ statusText.join(' + ') } hoch...`;
+
+                    const uploadFormData = new FormData();
+
+                    allFiles.forEach(f => uploadFormData.append('assets', f));
+                    uploadFormData.append('year', year);
+                    uploadFormData.append('month', month);
+                    uploadFormData.append('category', category);
+
+                    await new Promise((resolve, reject) => {
+                        const xhr = new XMLHttpRequest();
+
+                        xhr.upload.onprogress = (e) => {
+                            if (e.lengthComputable) {
+                                progressFill.style.width = (e.loaded / e.total * 100) + '%';
+                            }
+                        };
+
+                        xhr.onload = () => {
+                            try {
+                                const res = JSON.parse(xhr.responseText);
+                                if (res.success) {
+                                    uploadText.textContent = '✅ Fertig!';
+                                    resolve(res);
+                                } else {
+                                    reject(new Error(res.error));
+                                }
+                            } catch (err) {
+                                reject(err);
+                            }
+                        };
+
+                        xhr.onerror = () => reject(new Error('Upload fehlgeschlagen'));
+                        xhr.open('POST', '/admin/upload');
+                        xhr.send(uploadFormData);
+                    });
+                } else {
+                    uploadText.textContent = '✅ Ordner erstellt!';
+                    progressFill.style.width = '100%';
+                }
+
+                setTimeout(() => {
+                    hideNewFolderModal();
+                    progress.classList.remove('active');
+                    location.reload();
+                }, 1000);
+
+            } catch (err) {
+                console.error('Error:', err);
+                uploadText.textContent = '❌ Fehler: ' + err.message;
+                setTimeout(() => progress.classList.remove('active'), 3000);
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const colors = {
+                info: '#3b82f6',
+                success: '#22c55e',
+                warning: '#f59e0b',
+                error: '#ef4444'
+            };
+
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 2rem;
+                left: 50%;
+                transform: translateX(-50%);
+                background: ${ colors[type] || colors.info };
+                color: #fff;
+                padding: 1rem 2rem;
+                border-radius: 12px;
+                z-index: 10000;
+                font-weight: 600;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                animation: slideUp 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function getMonthFolderName(monthName) {
+            const monate = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+            const index = monate.indexOf(monthName);
+            const num = (index + 1).toString().padStart(2, "0");
+            return `${ num }_${ monthName }`;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('lightbox').classList.contains('active')) {
+                if (e.key === 'ArrowLeft') navigateLightbox(-1);
+                if (e.key === 'ArrowRight') navigateLightbox(1);
+                if (e.key === 'Escape') closeLightbox();
+            }
+            if (e.key === 'Escape' && document.getElementById('folderModal').classList.contains('active')) {
+                closeFolderModal();
+            }
+            if (e.key === 'Escape' && document.getElementById('newFolderModal').classList.contains('active')) {
+                hideNewFolderModal();
+            }
+            if (e.key === 'Escape' && document.getElementById('settingsModal').classList.contains('active')) {
+                closeSettings();
+            }
+        });
+
+        document.getElementById('modalDropZone').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget || e.target.closest('.drop-zone-text')) {
+                document.getElementById('modalFileInput').click();
+            }
+        });
+    </script>
+</body>
+
+</html>

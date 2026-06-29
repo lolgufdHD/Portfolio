@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* Lightbox */
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.92);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-out;
+        }
+        .lightbox-overlay.active { display: flex; }
+        .lightbox-overlay img {
+            max-width: 92vw;
+            max-height: 92vh;
+            object-fit: contain;
+            border-radius: 8px;
+            cursor: default;
+            transition: opacity 0.15s;
+        }
+        .lightbox-close {
+            position: fixed;
+            top: 1.2rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            color: #fff;
+            background: none;
+            border: none;
+            cursor: pointer;
+            opacity: 0.7;
+            line-height: 1;
+            z-index: 1001;
+        }
+        .lightbox-close:hover { opacity: 1; }
+        .lightbox-nav {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2.5rem;
+            color: #fff;
+            background: rgba(255,255,255,0.08);
+            border: none;
+            cursor: pointer;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            opacity: 0.6;
+            z-index: 1001;
+        }
+        .lightbox-nav:hover { opacity: 1; background: rgba(255,255,255,0.15); }
+        .lightbox-prev { left: 1rem; }
+        .lightbox-next { right: 1rem; }
+        /* Make timeline images clickable */
+        .timeline-entry-contents img {
+            cursor: zoom-in;
+        }
+    </style>
+</head>
+<body>
+    <div class="grain"></div>
+
+    <header id="page-anchor">
+        <div id="logo"></div>
+        <div><h1>Leo Skoda</h1></div>
+    </header>
+
+    <main>
+        <div class="aboutMe-container">
+            <div class="aboutMe-image">
+                <img src="<%= aboutMeImage %>" alt="Portrait von Leo Skoda" loading="lazy">
+            </div>
+            <div class="aboutMe-text">
+                <h2>Über mich</h2>
+                <p>
+                    Mein Name ist Leo,
+                    ich bin 22 Jahre alt und habe ein Fachabitur als Mediengestalter für Bild und Ton. 
+                    Zurzeit mache ich hauptsächlich Fotos, aber in meiner Freizeit probiere ich mich auch an Videos <br><br>
+                    Zudem arbeite ich auch mit CAD Software um Modelle für meinen 3D Drucker zu designen <br>
+                    <br>
+                    <a href="https://makerworld.com/@LeoDesigns" target="_blank">(Mein Makerworld Profil)</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="timeline-container">
+            <h2>Photography</h2>
+
+            <div class="timeline-content-container">
+                <div id="timeline-line"></div>
+
+                <div class="timeline-media-container">
+
+                    <% Object.keys(gallery)
+                        .sort((a, b) => Number(b) - Number(a))
+                        .forEach(year => {
+
+                        const yearData = gallery[year];
+
+                        const yearHasContent = Object.values(yearData).some(month =>
+                            Object.values(month).some(cat =>
+                                (cat.images && cat.images.length > 0) || cat.video
+                            )
+                        );
+
+                        if (!yearHasContent) return;
+                    %>
+
+                    <div class="timeline-year">
+                        <h2><%= year %></h2>
+
+                        <% for (const month in gallery[year]) {
+
+                            const monthData = gallery[year][month];
+
+                            const monthHasContent = Object.values(monthData).some(cat =>
+                                (cat.images && cat.images.length > 0) || cat.video
+                            );
+
+                            if (!monthHasContent) continue;
+                        %>
+
+                        <div class="timeline-month">
+                            <h3><%= month %></h3>
+
+                            <div class="timeline-entry-container">
+
+                                <% for (const category in monthData) {
+
+                                    const catData = monthData[category];
+
+                                    const hasContent =
+                                        (catData.images && catData.images.length > 0) ||
+                                        catData.video;
+
+                                    if (!hasContent) continue;
+                                %>
+
+                                <div class="timeline-entry">
+                                    <h5><%= category %></h5>
+
+                                    <div class="timeline-entry-contents">
+
+                                        <% catData.images.forEach((img, idx) => {
+                                            const fullSrc = `/timeline/${year}/${getMonthFolder(month)}/${category}/${img}`;
+                                        %>
+                                            <img 
+                                                src="<%= fullSrc %>"
+                                                data-full="<%= fullSrc %>"
+                                                data-group="<%= year %>-<%= month %>-<%= category %>"
+                                                data-index="<%= idx %>"
+                                                alt="" 
+                                                loading="lazy"
+                                                onclick="openLightbox(this)"
+                                            >
+                                        <% }) %>
+
+                                        <% if (catData.video) { %>
+                                            <div class="video-container">
+                                                <h5><%= catData.video.title %></h5>
+                                                <video 
+                                                    src="/timeline/<%= year %>/<%= getMonthFolder(month) %>/<%= category %>/<%= catData.video.filename %>" 
+                                                    controls 
+                                                    muted 
+                                                    loop 
+                                                    playsinline>
+                                                </video>
+                                            </div>
+                                        <% } %>
+
+                                    </div>
+                                </div>
+
+                                <% } %>
+
+                            </div>
+                        </div>
+
+                        <% } %>
+                    </div>
+
+                    <% }) %>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Lightbox -->
+    <div class="lightbox-overlay" id="lightbox" onclick="handleLightboxClick(event)">
+        <button class="lightbox-close" onclick="closeLightbox()">×</button>
+        <button class="lightbox-nav lightbox-prev" onclick="event.stopPropagation(); navigateLightbox(-1)">‹</button>
+        <img id="lightboxImg" src="" alt="">
+        <button class="lightbox-nav lightbox-next" onclick="event.stopPropagation(); navigateLightbox(1)">›</button>
+    </div>
+
+    <script>
+        let currentGroup = [];
+        let currentIndex = 0;
+
+        function openLightbox(imgEl) {
+            const group = imgEl.dataset.group;
+            const index = parseInt(imgEl.dataset.index);
+
+            currentGroup = Array.from(
+                document.querySelectorAll(`img[data-group="${group}"]`)
+            );
+            currentIndex = index;
+
+            setLightboxImage(currentIndex);
+            document.getElementById('lightbox').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function setLightboxImage(idx) {
+            const el = currentGroup[idx];
+            const full = el.dataset.full;
+            const lightboxImg = document.getElementById('lightboxImg');
+            lightboxImg.style.opacity = '0.5';
+            lightboxImg.src = full;
+            lightboxImg.onload = () => lightboxImg.style.opacity = '1';
+        }
+
+        function navigateLightbox(dir) {
+            currentIndex = (currentIndex + dir + currentGroup.length) % currentGroup.length;
+            setLightboxImage(currentIndex);
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+            document.body.style.overflow = '';
+            document.getElementById('lightboxImg').src = '';
+        }
+
+        function handleLightboxClick(e) {
+            if (e.target === e.currentTarget) closeLightbox();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (!document.getElementById('lightbox').classList.contains('active')) return;
+            if (e.key === 'ArrowLeft') navigateLightbox(-1);
+            if (e.key === 'ArrowRight') navigateLightbox(1);
+            if (e.key === 'Escape') closeLightbox();
+        });
+    </script>
+</body>
+</html>
